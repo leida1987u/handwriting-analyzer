@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>笔迹心鉴 · 汉字笔迹心理分析</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cinnabar:#C23A2B;--cinnabar-light:#D94F40;--cinnabar-dark:#8B1A1A;
+  --gold:#C8A45C;--gold-light:#E8D5A3;--gold-dark:#A67C3D;
+  --ink:#1A1A2E;--ink-light:#2D2D44;--ink-soft:#4A4A6A;
+  --paper:#FDF8F0;--paper-warm:#F5EDE0;--paper-dark:#E8DDD0;
+  --jade:#2D8B6F;--plum:#8B4570;
+  --cloud:rgba(255,255,255,0.95);
+  --shadow:0 8px 32px rgba(26,26,46,0.12);
+  --border:1px solid rgba(200,164,92,0.3);
+  --radius:12px;
+  --ease:all 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Noto Sans SC','PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(circle at 20% 20%,rgba(200,164,92,0.06) 0%,transparent 50%),
+    radial-gradient(circle at 80% 80%,rgba(194,58,43,0.04) 0%,transparent 50%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5C30 5 35 15 30 25C25 15 30 5 30 5Z' fill='none' stroke='%23C8A45C' stroke-width='.3' opacity='.08'/%3E%3Cpath d='M30 35C30 35 35 45 30 55C25 45 30 35 30 35Z' fill='none' stroke='%23C8A45C' stroke-width='.3' opacity='.08'/%3E%3C/svg%3E");
+}
+.hdr{
+  position:relative;background:linear-gradient(135deg,var(--ink),var(--ink-light),var(--cinnabar-dark));
+  padding:48px 24px 56px;text-align:center;overflow:hidden;
+}
+.hdr::after{
+  content:'';position:absolute;bottom:-2px;left:0;right:0;height:32px;
+  background:var(--paper);clip-path:ellipse(55% 100% at 50% 100%);
+}
+.seal{
+  width:72px;height:72px;border:3px solid var(--gold);border-radius:50%;
+  margin:0 auto 16px;display:flex;align-items:center;justify-content:center;
+  font-family:'Noto Serif SC',serif;font-size:28px;color:var(--gold);
+  background:rgba(200,164,92,0.1);position:relative;
+}
+.seal::after{content:'';position:absolute;inset:-6px;border:1px solid rgba(200,164,92,0.2);border-radius:50%}
+h1{
+  font-family:'Noto Serif SC',serif;font-size:clamp(28px,6vw,42px);
+  font-weight:900;color:var(--gold-light);letter-spacing:8px;margin-bottom:8px;
+}
+.sub{font-size:14px;color:rgba(232,213,163,0.7);letter-spacing:4px;font-weight:300}
+.wrap{max-width:900px;margin:-24px auto 0;padding:0 16px 60px;position:relative;z-index:1}
+
+/* Cards */
+.card{
+  background:var(--cloud);border-radius:var(--radius);box-shadow:var(--shadow);
+  border:var(--border);margin-bottom:24px;overflow:hidden;animation:fadeUp .6s ease-out;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.card-hd{
+  background:linear-gradient(135deg,var(--paper-warm),var(--paper-dark));
+  padding:16px 24px;border-bottom:var(--border);display:flex;align-items:center;gap:12px;
+}
+.card-hd .ico{
+  width:36px;height:36px;background:linear-gradient(135deg,var(--cinnabar),var(--cinnabar-dark));
+  border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+}
+.card-hd h2{font-family:'Noto Serif SC',serif;font-size:18px;font-weight:700}
+.card-bd{padding:24px}
+
+/* Upload */
+.upload{
+  border:2px dashed var(--gold);border-radius:var(--radius);padding:48px 24px;
+  text-align:center;cursor:pointer;transition:var(--ease);
+  background:linear-gradient(135deg,rgba(200,164,92,0.03),rgba(200,164,92,0.08));
+}
+.upload:hover{border-color:var(--cinnabar);background:rgba(194,58,43,0.06);transform:translateY(-2px)}
+.upload.over{border-color:var(--cinnabar);background:rgba(194,58,43,0.1)}
+.upload-icon{font-size:48px;margin-bottom:16px;display:block}
+.upload-txt{font-size:16px;color:var(--ink-soft);margin-bottom:8px}
+.upload-hint{font-size:13px;color:var(--gold-dark)}
+#preview{display:none;margin-top:20px;position:relative}
+#preview img{max-width:100%;max-height:300px;border-radius:8px;border:1px solid var(--paper-dark);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+
+/* Buttons */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;padding:14px 36px;border:none;border-radius:8px;
+  font-family:'Noto Sans SC',sans-serif;font-size:16px;font-weight:500;cursor:pointer;
+  transition:var(--ease);letter-spacing:2px;overflow:hidden;
+}
+.btn-p{
+  background:linear-gradient(135deg,var(--cinnabar),var(--cinnabar-dark));color:#fff;
+  box-shadow:0 4px 16px rgba(194,58,43,0.3);
+}
+.btn-p:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 24px rgba(194,58,43,0.4)}
+.btn-p:disabled{opacity:.6;cursor:not-allowed}
+.btn-s{
+  background:linear-gradient(135deg,var(--ink),var(--ink-light));color:var(--gold-light);
+  box-shadow:0 4px 16px rgba(26,26,46,0.2);
+}
+.btn-s:hover:not(:disabled){transform:translateY(-2px)}
+.btns{display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap}
+
+/* Settings */
+.settings{background:var(--paper-warm);border-radius:var(--radius);padding:20px;margin-bottom:16px;border:var(--border)}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:4px;letter-spacing:1px}
+.fg input,.fg select{
+  width:100%;padding:10px 14px;border:1px solid var(--paper-dark);border-radius:6px;
+  font-size:14px;font-family:'Noto Sans SC',sans-serif;background:#fff;color:var(--ink);transition:var(--ease);
+}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,164,92,0.15)}
+
+/* Result dimensions */
+.dim{
+  background:var(--paper);border-radius:var(--radius);padding:20px;margin-bottom:16px;
+  border-left:4px solid var(--cinnabar);transition:var(--ease);
+}
+.dim:hover{box-shadow:0 4px 12px rgba(0,0,0,0.06);transform:translateX(4px)}
+.dim.pos{border-left-color:var(--jade)}
+.dim.warn{border-left-color:var(--gold-dark)}
+.dim.risk{border-left-color:var(--cinnabar)}
+.dim.neut{border-left-color:var(--ink-soft)}
+.dim-t{
+  font-family:'Noto Serif SC',serif;font-size:16px;font-weight:700;margin-bottom:8px;
+  display:flex;align-items:center;gap:8px;
+}
+.badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;font-family:'Noto Sans SC',sans-serif}
+.b-hi{background:rgba(45,139,111,0.12);color:var(--jade)}
+.b-md{background:rgba(200,164,92,0.15);color:var(--gold-dark)}
+.b-lo{background:rgba(194,58,43,0.1);color:var(--cinnabar)}
+.b-no{background:rgba(74,74,106,0.1);color:var(--ink-soft)}
+.dim-c{font-size:14px;line-height:1.8;color:var(--ink-soft)}
+.dim-c strong{color:var(--ink);font-weight:500}
+
+/* Sample eval */
+.eval{background:linear-gradient(135deg,rgba(200,164,92,0.08),rgba(200,164,92,0.03));border-radius:var(--radius);padding:16px 20px;margin-bottom:20px;border:1px solid rgba(200,164,92,0.2)}
+.eval-t{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:700;color:var(--gold-dark);margin-bottom:10px}
+.eval-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.eval-i{font-size:13px;color:var(--ink-soft)}
+.eval-i span{color:var(--ink);font-weight:500}
+
+/* Core feature */
+.core{background:linear-gradient(135deg,rgba(194,58,43,0.06),rgba(194,58,43,0.02));border-radius:var(--radius);padding:20px;margin:20px 0;border:1px solid rgba(194,58,43,0.15)}
+.core-t{font-family:'Noto Serif SC',serif;font-size:15px;font-weight:700;color:var(--cinnabar);margin-bottom:8px}
+.core-c{font-size:14px;line-height:1.8;color:var(--ink-soft)}
+
+/* Advice */
+.adv{background:linear-gradient(135deg,rgba(45,139,111,0.06),rgba(45,139,111,0.02));border-radius:var(--radius);padding:16px 20px;margin:16px 0;border:1px solid rgba(45,139,111,0.15)}
+.adv .t{font-family:'Noto Serif SC',serif;font-size:14px;font-weight:700;color:var(--jade);margin-bottom:8px}
+.adv p{font-size:13px;line-height:1.7;color:var(--ink-soft)}
+
+/* Notice */
+.notice{
+  background:rgba(194,58,43,0.06);border:1px solid rgba(194,58,43,0.15);
+  border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--cinnabar);display:none;
+}
+.notice.show{display:block}
+
+/* Loading */
+.loading{
+  display:none;position:fixed;inset:0;background:rgba(26,26,46,0.7);backdrop-filter:blur(8px);
+  z-index:1000;justify-content:center;align-items:center;flex-direction:column;
+}
+.loading.on{display:flex}
+.loading-ico{font-size:48px;margin-bottom:24px;animation:pump 1.5s ease-in-out infinite}
+@keyframes pump{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg) scale(1.1)}}
+.loading-txt{color:var(--gold-light);font-family:'Noto Serif SC',serif;font-size:18px;letter-spacing:4px;animation:glow 2s ease-in-out infinite}
+@keyframes glow{0%,100%{opacity:.6}50%{opacity:1}}
+.loading-sub{color:rgba(232,213,163,0.5);font-size:13px;margin-top:8px}
+
+/* Footer */
+.ft{text-align:center;padding:32px 16px;color:var(--ink-soft);font-size:12px;letter-spacing:2px;opacity:.6}
+.ft .dv{width:60px;height:1px;background:var(--gold);margin:12px auto;opacity:.4}
+
+@media(max-width:640px){
+  .hdr{padding:32px 16px 40px}.card-bd{padding:16px}.upload{padding:32px 16px}
+  .btn{padding:12px 24px;font-size:14px}.btns{flex-direction:column;align-items:center}
+  h1{letter-spacing:4px}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="seal">鉴</div>
+  <h1>笔迹心鉴</h1>
+  <p class="sub">汉字笔迹心理分析系统</p>
+</header>
+
+<div class="wrap">
+
+  <!-- Settings -->
+  <div class="card" style="animation-delay:.1s">
+    <div class="card-hd"><div class="ico">⚙️</div><h2>分析引擎</h2></div>
+    <div class="card-bd">
+      <div class="settings" style="background:transparent;border:none;padding:0">
+        <div class="fg">
+          <label>API 地址</label>
+          <input type="text" id="api-url" value="https://dashscope.aliyuncs.com/compatible-mode/v1">
+        </div>
+        <div class="fg">
+          <label>API Key</label>
+          <input type="password" id="api-key" value="sk-a3e2688283724d22bb026476431f6d6c">
+        </div>
+        <div class="fg">
+          <label>模型</label>
+          <select id="model">
+            <option value="qwen-vl-max" selected>通义千问 Qwen-VL Max（推荐）</option>
+            <option value="glm-4v-flash">智谱 GLM-4V Flash（备用）</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload -->
+  <div class="card" style="animation-delay:.2s">
+    <div class="card-hd"><div class="ico">📝</div><h2>上传笔迹样本</h2></div>
+    <div class="card-bd">
+      <div class="upload" id="drop">
+        <span class="upload-icon">📃</span>
+        <p class="upload-txt">点击或拖拽图片到此处</p>
+        <p class="upload-hint">支持 JPG / PNG / WEBP</p>
+        <input type="file" id="fi" accept="image/*" style="display:none">
+      </div>
+      <div id="preview">
+        <img id="pimg" src="" alt="预览">
+        <p style="text-align:center;margin-top:8px;font-size:12px;color:var(--ink-soft)">
+          <span id="fname"></span>
+          <a href="javascript:void(0)" onclick="clr()" style="color:var(--cinnabar);margin-left:8px">✕ 移除</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="btns">
+    <button class="btn btn-p" id="go" disabled onclick="analyze()">🔍 开始分析</button>
+  </div>
+
+  <div class="notice" id="notice"></div>
+
+  <!-- Results -->
+  <div id="results" style="display:none;margin-top:32px">
+
+    <div class="card"><div class="card-hd"><div class="ico">📋</div><h2>样本条件评估</h2></div><div class="card-bd"><div id="r-sample"></div></div></div>
+    <div class="card"><div class="card-hd"><div class="ico">🔮</div><h2>八维度心理分析</h2></div><div class="card-bd"><div id="r-dims"></div></div></div>
+    <div class="card"><div class="card-hd"><div class="ico">⚡</div><h2>核心特征与综合判断</h2></div><div class="card-bd"><div id="r-core"></div></div></div>
+    <div class="card"><div class="card-hd"><div class="ico">💡</div><h2>提升分析置信度建议</h2></div><div class="card-bd"><div id="r-adv"></div></div></div>
+
+  </div>
+
+</div>
+
+<div class="ft">
+  <p>笔迹心鉴 · 汉字笔迹心理分析系统</p>
+  <div class="dv"></div>
+  <p>基于郑日昌《笔迹心理学》理论体系 · 本工具仅供学术参考</p>
+</div>
+
+<div class="loading" id="ld">
+  <div class="loading-ico">🖌️</div>
+  <div class="loading-txt">正在分析笔迹</div>
+  <div class="loading-sub">Qwen-VL Max 多模态深度解析中…</div>
+</div>
+
+<script>
+const $=s=>document.getElementById(s);
+const drop=$('drop'),fi=$('fi'),pv=$('preview'),pimg=$('pimg'),fname=$('fname'),goBtn=$('go');
+let img64=null;
+
+// Upload
+drop.onclick=()=>fi.click();
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
+drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files[0]?.type.startsWith('image/'))handle(e.dataTransfer.files[0])};
+fi.onchange=()=>{if(fi.files[0])handle(fi.files[0])};
+
+function handle(f){
+  if(f.size > 10*1024*1024){notice('图片过大，请上传10MB以下的图片');return}
+  const r=new FileReader();
+  r.onload=e=>{
+    const raw = e.target.result;
+    // 用canvas压缩到800px宽
+    const img = new Image();
+    img.onload=()=>{
+      const c = document.createElement('canvas');
+      let w=img.width, h=img.height;
+      const maxDim=800;
+      if(w>maxDim||h>maxDim){
+        if(w>h){h=Math.round(h*maxDim/w);w=maxDim}
+        else{w=Math.round(w*maxDim/h);h=maxDim}
+      }
+      c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      img64=c.toDataURL('image/jpeg',0.75);
+      pimg.src=img64;
+      fname.textContent=f.name+' (已压缩 '+Math.round(img64.length*0.75/1024)+'KB)';
+      pv.style.display='block';drop.style.display='none';goBtn.disabled=false;
+    };
+    img.onerror=()=>{
+      // 压缩失败就用原图
+      img64=raw;
+      pimg.src=img64;
+      fname.textContent=f.name;
+      pv.style.display='block';drop.style.display='none';goBtn.disabled=false;
+    };
+    img.src=raw;
+  };
+  r.readAsDataURL(f);
+}
+function clr(){
+  img64=null;pv.style.display='none';drop.style.display='block';goBtn.disabled=true;fi.value='';
+  $('results').style.display='none';
+}
+
+function notice(m,t='err'){
+  const n=$('notice');n.textContent=m;n.className='notice show';
+  n.style.background=t==='info'?'rgba(45,139,111,0.06)':'rgba(194,58,43,0.06)';
+  n.style.borderColor=t==='info'?'rgba(45,139,111,0.15)':'rgba(194,58,43,0.15)';
+  n.style.color=t==='info'?'var(--jade)':'var(--cinnabar)';
+}
+
+const SYS_PROMPT=`你是一位资深的笔迹心理学分析师，精通郑日昌主编《笔迹心理学》的理论体系。
+
+请严格按以下模板输出，不准讨好、不准幻觉、不准编造不存在的特征。
+
+## 前置：样本条件评估（必须先输出）
+- 纸张类型与用途
+- 书写工具
+- 内容字数
+- 有无签名
+- 书写目的判断（正式/随意/给他人看/自然书写）
+- 综合置信度评级：高/中/中低/低/极低
+
+## 八个分析维度（每项：观察特征 → 可能含义 → 风险面 → 不确定部分）
+
+1. 城府
+2. 个人品德
+3. 家庭观念
+4. 婚恋心理
+5. 思维方式
+6. 对外情绪
+7. 个人气质
+8. 个人天赋
+
+## 核心特征总结
+找出最突出的2-3个共性特征，说明交叉含义
+
+## 提升置信度建议
+需要什么补充样本
+
+输出要求：结构化文字，每维度分段清晰，用分隔线隔开。全程不用"您""很好""很优秀"等讨好词汇。`;
+
+async function analyze(){
+  if(!img64){notice('请先上传笔迹图片');return}
+  const url=$('api-url').value.trim(),key=$('api-key').value.trim(),model=$('model').value;
+  if(!url||!key){notice('请配置API');return}
+
+  $('ld').classList.add('on');
+  $('results').style.display='none';
+
+  const hdrs={'Content-Type':'application/json','Authorization':`Bearer ${key}`};
+  if(url.includes('openrouter')){hdrs['HTTP-Referer']=location.href;hdrs['X-Title']='Handwriting-Analyze'}
+
+  try{
+    const res=await fetch(`${url}/chat/completions`,{
+      method:'POST',headers:hdrs,
+      body:JSON.stringify({
+        model,messages:[
+          {role:'system',content:SYS_PROMPT},
+          {role:'user',content:[
+            {type:'image_url',image_url:{url:img64}},
+            {type:'text',text:'请对这张笔迹图片进行全面的笔迹心理分析，严格按照模板输出：'}
+          ]}
+        ],
+        max_tokens:4096,temperature:0.3
+      })
+    });
+    if(!res.ok){const t=await res.text();let msg=t;try{const j=JSON.parse(t);msg=j.error?.message||j.message||t}catch(e){}throw new Error(`API ${res.status}: ${msg}`)}
+    const d=await res.json();
+    render(d.choices[0].message.content);
+  }catch(e){notice('分析失败: '+e.message)}
+  finally{$('ld').classList.remove('on')}
+}
+
+function render(text){
+  $('results').style.display='block';
+
+  // Sample eval
+  const se=$('r-sample');
+  const sm=text.match(/样本条件评估([\s\S]*?)(?=城府|个人品德|一、|1[.、])/i);
+  if(sm){
+    let h='<div class="eval"><div class="eval-t">📋 样本条件评估</div><div class="eval-g">';
+    sm[1].split('\n').filter(l=>l.trim()).forEach(l=>{
+      const c=l.replace(/^[•\-\d\.\s、]+/,'').trim();
+      const i=c.indexOf('：');
+      if(i>-1) h+=`<div class="eval-i"><strong>${c.slice(0,i)}：</strong><span>${c.slice(i+1)}</span></div>`;
+      else if(c) h+=`<div class="eval-i"><span>${c}</span></div>`;
+    });
+    h+='</div></div>';se.innerHTML=h;
+  }else{
+    se.innerHTML=`<div class="eval"><div class="eval-t">📋 样本条件评估</div><p style="font-size:14px;color:var(--ink-soft)">${text.substring(0,300)}...</p></div>`;
+  }
+
+  // Dimensions
+  const dims=[
+    {n:'城府',i:'🏰',t:'risk'},
+    {n:'个人品德',i:'⚖️',t:'pos'},
+    {n:'家庭观念',i:'🏠',t:'neut'},
+    {n:'婚恋心理',i:'💕',t:'warn'},
+    {n:'思维方式',i:'🧠',t:'pos'},
+    {n:'对外情绪',i:'😊',t:'warn'},
+    {n:'个人气质',i:'🎭',t:'neut'},
+    {n:'个人天赋',i:'✨',t:'pos'}
+  ];
+  const allNames=dims.map(d=>d.n).join('|');
+  let dh='';
+  for(const d of dims){
+    const rx=new RegExp(`${d.n}[：:]?([\\s\\S]*?)(?=${allNames}|核心特征|提升|###|$)`,'i');
+    const m=text.match(rx);
+    if(m&&m[1].trim().length>10){
+      let badge='<span class="badge b-md">中</span>';
+      const c=m[1];
+      if(/置信度[：:]\s*高/.test(c))badge='<span class="badge b-hi">高</span>';
+      else if(/置信度[：:]\s*低/.test(c))badge='<span class="badge b-lo">低</span>';
+      else if(/置信度[：:]\s*极低|无法判断/.test(c))badge='<span class="badge b-no">极低</span>';
+      dh+=`<div class="dim ${d.t}"><div class="dim-t">${d.i} ${d.n} ${badge}</div><div class="dim-c">${fmt(m[1].trim())}</div></div>`;
+    }
+  }
+  $('r-dims').innerHTML=dh||'<p style="color:var(--ink-soft)">解析中…</p>';
+
+  // Core
+  const cm=text.match(/核心特征([\s\S]*?)$/i);
+  $('r-core').innerHTML=cm?`<div class="core"><div class="core-t">⚡ 核心特征</div><div class="core-c">${fmt(cm[1])}</div></div>`:'<p style="color:var(--ink-soft)">见上方分析</p>';
+
+  // Advice
+  const am=text.match(/提升.*?建议([\s\S]*?)$/i);
+  $('r-adv').innerHTML=am?`<div class="adv"><div class="t">💡 提升置信度建议</div><p>${fmt(am[1])}</p></div>`:'<p style="color:var(--ink-soft)">分析完成。</p>';
+
+  $('results').scrollIntoView({behavior:'smooth'});
+}
+
+function fmt(t){
+  return t.replace(/\n/g,'<br>')
+    .replace(/【(.*?)】/g,'<strong>【$1】</strong>')
+    .replace(/(观察特征|可能含义|风险面|不确定部分)/g,'<strong>$1</strong>')
+    .replace(/(置信度[：:][^\n<]+)/g,'<span style="display:inline-block;font-size:12px;color:var(--cinnabar);background:rgba(194,58,43,0.08);padding:2px 8px;border-radius:4px;margin-top:4px">$1</span>');
+}
+</script>
+</body>
+</html>
