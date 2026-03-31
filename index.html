@@ -406,7 +406,7 @@ function render(text){
     });
     h+='</div></div>';se.innerHTML=h;
   }else{
-    se.innerHTML=`<div class="eval"><div class="eval-t">📋 样本条件评估</div><p style="font-size:14px;color:var(--ink-soft)">${text.substring(0,300)}...</p></div>`;
+    se.innerHTML=`<div class="eval"><div class="eval-t">📋 样本条件评估</div><p style="font-size:14px;color:var(--ink-soft)">${escHtml(text.substring(0,300))}...</p></div>`;
   }
 
   // Dimensions
@@ -438,11 +438,11 @@ function render(text){
 
   // Core
   const cm=text.match(/核心特征([\s\S]*?)$/i);
-  $('r-core').innerHTML=cm?`<div class="core"><div class="core-t">⚡ 核心特征</div><div class="core-c">${fmt(cm[1])}</div></div>`:'<p style="color:var(--ink-soft)">见上方分析</p>';
+  $('r-core').innerHTML=cm?`<div class="core"><div class="core-t">⚡ 核心特征</div><div class="core-c">${fmt(escHtml(cm[1]))}</div></div>`:'<p style="color:var(--ink-soft)">见上方分析</p>';
 
   // Advice
   const am=text.match(/提升.*?建议([\s\S]*?)$/i);
-  $('r-adv').innerHTML=am?`<div class="adv"><div class="t">💡 提升置信度建议</div><p>${fmt(am[1])}</p></div>`:'<p style="color:var(--ink-soft)">分析完成。</p>';
+  $('r-adv').innerHTML=am?`<div class="adv"><div class="t">💡 提升置信度建议</div><p>${fmt(escHtml(am[1]))}</p></div>`:'<p style="color:var(--ink-soft)">分析完成。</p>';
 
   $('results').scrollIntoView({behavior:'smooth'});
 }
@@ -452,6 +452,15 @@ function fmt(t){
     .replace(/【(.*?)】/g,'<strong>【$1】</strong>')
     .replace(/(观察特征|可能含义|风险面|不确定部分)/g,'<strong>$1</strong>')
     .replace(/(置信度[：:][^\n<]+)/g,'<span style="display:inline-block;font-size:12px;color:var(--cinnabar);background:rgba(194,58,43,0.08);padding:2px 8px;border-radius:4px;margin-top:4px">$1</span>');
+}
+
+function escHtml(t){
+  return String(t)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
 }
 </script>
 
