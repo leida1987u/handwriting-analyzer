@@ -4,7 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>笔迹心鉴 · 汉字笔迹心理分析</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<!-- Google Fonts (fallback: system fonts will load immediately) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet"></noscript>
 <style>
 :root {
   --cinnabar:#C23A2B;--cinnabar-light:#D94F40;--cinnabar-dark:#8B1A1A;
@@ -207,7 +211,8 @@ h1{
         <div class="fg">
           <label>模型</label>
           <select id="model">
-            <option value="qwen-vl-max" selected>通义千问 Qwen-VL Max（推荐）</option>
+            <option value="qwen-vl-max" selected>通义千问 Qwen-VL Max（推荐·分析最全）</option>
+            <option value="qwen-vl-plus">通义千问 Qwen-VL Plus（更快）</option>
             <option value="glm-4v-flash">智谱 GLM-4V Flash（备用）</option>
           </select>
         </div>
@@ -287,16 +292,16 @@ function handle(f){
     img.onload=()=>{
       const c = document.createElement('canvas');
       let w=img.width, h=img.height;
-      const maxDim=800;
+      const maxDim=600;
       if(w>maxDim||h>maxDim){
         if(w>h){h=Math.round(h*maxDim/w);w=maxDim}
         else{w=Math.round(w*maxDim/h);h=maxDim}
       }
       c.width=w;c.height=h;
       c.getContext('2d').drawImage(img,0,0,w,h);
-      img64=c.toDataURL('image/jpeg',0.75);
+      img64=c.toDataURL('image/jpeg',0.6);
       pimg.src=img64;
-      fname.textContent=f.name+' (已压缩 '+Math.round(img64.length*0.75/1024)+'KB)';
+      fname.textContent=f.name+' (已压缩 '+Math.round(img64.length*0.6/1024)+'KB)';
       pv.style.display='block';drop.style.display='none';goBtn.disabled=false;
     };
     img.onerror=()=>{
@@ -449,5 +454,68 @@ function fmt(t){
     .replace(/(置信度[：:][^\n<]+)/g,'<span style="display:inline-block;font-size:12px;color:var(--cinnabar);background:rgba(194,58,43,0.08);padding:2px 8px;border-radius:4px;margin-top:4px">$1</span>');
 }
 </script>
+
+<!-- Ensure page loads even if fonts fail -->
+<script>
+// If page is still invisible after 2s, force show
+setTimeout(function(){
+  document.body.style.opacity='1';
+  document.body.style.transition='opacity 0.5s';
+},2000);
+</script>
+
+<!-- 使用须知 -->
+<div class="wrap" style="margin-top:0">
+  <div class="card" style="animation-delay:.2s">
+    <div class="card-hd">
+      <div class="ico" style="background:linear-gradient(135deg,#2D8B6F,#1a6b4f)">📜</div>
+      <h2>使用须知</h2>
+    </div>
+    <div class="card-bd" style="font-size:14px;color:var(--ink-soft);line-height:2">
+      <p>① <strong>笔迹分析仅供参考</strong>，基于郑日昌《笔迹心理学》理论框架，不可作为人格定论或心理诊断依据。</p>
+      <p>② <strong>自然书写优先</strong>：日常笔记、草稿等自然书写材料的分析置信度远高于书法创作作品。</p>
+      <p>③ <strong>多样本原则</strong>：一次测验不算测验。建议提供 50 字以上正文 + 签名，多份不同情境下的笔迹更佳。</p>
+      <p>④ <strong>隐私保护</strong>：上传的图片仅用于本次分析，不会被存储或用于其他用途。</p>
+    </div>
+  </div>
+</div>
+
+<!-- 关于作者 -->
+<div class="wrap" style="margin-top:0">
+  <div class="card" style="animation-delay:.3s">
+    <div class="card-hd">
+      <div class="ico" style="background:linear-gradient(135deg,var(--gold-dark),var(--gold))">🏝️</div>
+      <h2>关于</h2>
+    </div>
+    <div class="card-bd">
+      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+        <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--cinnabar),var(--cinnabar-dark));display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;border:3px solid var(--gold)">🦞</div>
+        <div style="flex:1;min-width:200px">
+          <h3 style="font-family:'Noto Serif SC',serif;font-size:20px;margin-bottom:4px;color:var(--ink)">毅哥和他的小伙伴们 🌴</h3>
+          <p style="font-size:14px;color:var(--ink-soft);margin-bottom:8px">记录生活中的灵感碎片 · 一起成长</p>
+          <p style="font-size:13px;color:var(--ink-soft);line-height:1.8">
+            本站由毅哥团队开发，基于郑日昌《笔迹心理学》理论框架，结合 AI 大模型的视觉识别能力，
+            为你提供一键式的笔迹心理分析体验。从 8 个维度解读书写者的性格特征。
+          </p>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding-top:16px;border-top:var(--border);display:flex;gap:12px;flex-wrap:wrap">
+        <a href="https://leida1987u.github.io/island-blog/" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--paper-warm);border-radius:6px;text-decoration:none;color:var(--ink-soft);font-size:13px;border:1px solid rgba(200,164,92,0.3);transition:var(--ease)">
+          🏝️ 岛屿来信
+        </a>
+        <a href="https://github.com/leida1987u" target="_blank" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--paper-warm);border-radius:6px;text-decoration:none;color:var(--ink-soft);font-size:13px;border:1px solid rgba(200,164,92,0.3);transition:var(--ease)">
+          💻 GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer style="text-align:center;padding:32px 16px 48px;position:relative;z-index:1">
+  <p style="font-size:12px;color:var(--gold-dark);letter-spacing:2px">© 2026 毅哥和他的小伙伴们 · 笔迹心鉴</p>
+  <p style="font-size:11px;color:rgba(200,164,92,0.5);margin-top:8px">基于郑日昌《笔迹心理学》· 通义千问 Qwen-VL-Max 视觉模型</p>
+</footer>
+
 </body>
 </html>
