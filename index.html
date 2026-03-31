@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https:; connect-src 'self' https:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'unsafe-inline';">
 <title>笔迹心鉴 · 汉字笔迹心理分析</title>
 <!-- Google Fonts (fallback: system fonts will load immediately) -->
 <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
@@ -291,7 +292,7 @@ function handle(f){
   const r=new FileReader();
   r.onload=e=>{
     const raw = e.target.result;
-    // 用canvas压缩到800px宽
+    // 用canvas压缩到600px宽
     const img = new Image();
     img.onload=()=>{
       const c = document.createElement('canvas');
@@ -309,10 +310,11 @@ function handle(f){
       pv.style.display='block';drop.style.display='none';goBtn.disabled=false;
     };
     img.onerror=()=>{
-      // 压缩失败就用原图
+      // 压缩失败就用原图（但限制大小）
+      if(raw.length > 2*1024*1024){notice('图片压缩失败且原图过大，请换一张小图');return}
       img64=raw;
       pimg.src=img64;
-      fname.textContent=f.name;
+      fname.textContent=f.name+' (原图)';
       pv.style.display='block';drop.style.display='none';goBtn.disabled=false;
     };
     img.src=raw;
@@ -365,6 +367,8 @@ const SYS_PROMPT=`你是一位资深的笔迹心理学分析师，精通郑日�
 async function analyze(){
   if(!img64){notice('请先上传笔迹图片');return}
   const url=$('api-url').value.trim(),key=$('api-key').value.trim(),proxy=$('proxy-url').value.trim(),model=$('model').value;
+  if(proxy && !/^https:\/\//.test(proxy)){notice('代理地址必须使用 https:// 协议');return}
+  if(!proxy && !/^https:\/\//.test(url)){notice('API 地址必须使用 https:// 协议');return}
   if(!proxy && (!url||!key)){notice('请配置API或代理地址');return}
 
   $('ld').classList.add('on');
@@ -417,7 +421,7 @@ function render(text){
   if(sm){
     let h='<div class="eval"><div class="eval-t">📋 样本条件评估</div><div class="eval-g">';
     sm[1].split('\n').filter(l=>l.trim()).forEach(l=>{
-      const c=l.replace(/^[•\-\d\.\s、]+/,'').trim();
+      const c=escHtml(l.replace(/^[•\-\d\.\s、]+/,'').trim());
       const i=c.indexOf('：');
       if(i>-1) h+=`<div class="eval-i"><strong>${c.slice(0,i)}：</strong><span>${c.slice(i+1)}</span></div>`;
       else if(c) h+=`<div class="eval-i"><span>${c}</span></div>`;
@@ -456,17 +460,17 @@ function render(text){
 
   // Core
   const cm=text.match(/核心特征([\s\S]*?)$/i);
-  $('r-core').innerHTML=cm?`<div class="core"><div class="core-t">⚡ 核心特征</div><div class="core-c">${fmt(escHtml(cm[1]))}</div></div>`:'<p style="color:var(--ink-soft)">见上方分析</p>';
+  $('r-core').innerHTML=cm?`<div class="core"><div class="core-t">⚡ 核心特征</div><div class="core-c">${fmt(cm[1])}</div></div>`:'<p style="color:var(--ink-soft)">见上方分析</p>';
 
   // Advice
   const am=text.match(/提升.*?建议([\s\S]*?)$/i);
-  $('r-adv').innerHTML=am?`<div class="adv"><div class="t">💡 提升置信度建议</div><p>${fmt(escHtml(am[1]))}</p></div>`:'<p style="color:var(--ink-soft)">分析完成。</p>';
+  $('r-adv').innerHTML=am?`<div class="adv"><div class="t">💡 提升置信度建议</div><p>${fmt(am[1])}</p></div>`:'<p style="color:var(--ink-soft)">分析完成。</p>';
 
   $('results').scrollIntoView({behavior:'smooth'});
 }
 
 function fmt(t){
-  return t.replace(/\n/g,'<br>')
+  return escHtml(t).replace(/\n/g,'<br>')
     .replace(/【(.*?)】/g,'<strong>【$1】</strong>')
     .replace(/(观察特征|可能含义|风险面|不确定部分)/g,'<strong>$1</strong>')
     .replace(/(置信度[：:][^\n<]+)/g,'<span style="display:inline-block;font-size:12px;color:var(--cinnabar);background:rgba(194,58,43,0.08);padding:2px 8px;border-radius:4px;margin-top:4px">$1</span>');
