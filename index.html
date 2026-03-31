@@ -206,11 +206,11 @@ h1{
           <input type="text" id="api-url" value="https://dashscope.aliyuncs.com/compatible-mode/v1">
         </div>
         <div class="fg">
-          <label>API Key</label>
+          <label>API Key（直接调用时必填）</label>
           <input type="password" id="api-key" placeholder="请输入你的 API Key">
         </div>
         <div class="fg">
-          <label>代理地址（可选）</label>
+          <label>代理地址（可选，填了代理可免填 Key）</label>
           <input type="text" id="proxy-url" placeholder="例如：https://your-worker.example.com/analyze">
         </div>
         <div class="fg">
@@ -222,6 +222,7 @@ h1{
           </select>
         </div>
       </div>
+      <p style="font-size:12px;color:var(--ink-soft);margin-top:8px;line-height:1.6">💡 填写「API Key」可直接调用通义千问接口；或填写「代理地址」使用自己的转发服务（代理模式下 Key 由服务端管理）。</p>
     </div>
   </div>
 
@@ -367,9 +368,9 @@ const SYS_PROMPT=`你是一位资深的笔迹心理学分析师，精通郑日�
 async function analyze(){
   if(!img64){notice('请先上传笔迹图片');return}
   const url=$('api-url').value.trim(),key=$('api-key').value.trim(),proxy=$('proxy-url').value.trim(),model=$('model').value;
-  if(proxy && !/^https:\/\//.test(proxy)){notice('代理地址必须使用 https:// 协议');return}
-  if(!proxy && !/^https:\/\//.test(url)){notice('API 地址必须使用 https:// 协议');return}
-  if(!proxy && (!url||!key)){notice('请配置API或代理地址');return}
+  if(proxy && !/^https?:\/\//.test(proxy)){notice('代理地址格式不正确，请输入完整的 URL');return}
+  if(!proxy && !url){notice('请配置 API 地址或代理地址');return}
+  if(!proxy && !key){notice('请输入 API Key（或填写代理地址）');return}
 
   $('ld').classList.add('on');
   $('results').style.display='none';
