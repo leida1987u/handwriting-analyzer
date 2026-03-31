@@ -209,6 +209,10 @@ h1{
           <input type="password" id="api-key" placeholder="请输入你的 API Key">
         </div>
         <div class="fg">
+          <label>代理地址（可选）</label>
+          <input type="text" id="proxy-url" placeholder="例如：https://your-worker.example.com/analyze">
+        </div>
+        <div class="fg">
           <label>模型</label>
           <select id="model">
             <option value="qwen3-omni-flash" selected>通义千问 Qwen3 Omni Flash（推荐·多模态）</option>
@@ -360,32 +364,46 @@ const SYS_PROMPT=`你是一位资深的笔迹心理学分析师，精通郑日�
 
 async function analyze(){
   if(!img64){notice('请先上传笔迹图片');return}
-  const url=$('api-url').value.trim(),key=$('api-key').value.trim(),model=$('model').value;
-  if(!url||!key){notice('请配置API');return}
+  const url=$('api-url').value.trim(),key=$('api-key').value.trim(),proxy=$('proxy-url').value.trim(),model=$('model').value;
+  if(!proxy && (!url||!key)){notice('请配置API或代理地址');return}
 
   $('ld').classList.add('on');
   $('results').style.display='none';
 
-  const hdrs={'Content-Type':'application/json','Authorization':`Bearer ${key}`};
-  if(url.includes('openrouter')){hdrs['HTTP-Referer']=location.href;hdrs['X-Title']='Handwriting-Analyze'}
-
   try{
-    const res=await fetch(`${url}/chat/completions`,{
-      method:'POST',headers:hdrs,
-      body:JSON.stringify({
-        model,messages:[
-          {role:'system',content:SYS_PROMPT},
-          {role:'user',content:[
-            {type:'image_url',image_url:{url:img64}},
-            {type:'text',text:'请对这张笔迹图片进行全面的笔迹心理分析，严格按照模板输出：'}
-          ]}
-        ],
-        max_tokens:4096,temperature:0.3
-      })
-    });
+    let res;
+    if(proxy){
+      res = await fetch(proxy, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          model,
+          image:img64,
+          prompt:'请对这张笔迹图片进行全面的笔迹心理分析，严格输出模板。',
+          system:SYS_PROMPT
+        })
+      });
+    } else {
+      const hdrs={'Content-Type':'application/json','Authorization':`Bearer ${key}`};
+      if(url.includes('openrouter')){hdrs['HTTP-Referer']=location.href;hdrs['X-Title']='Handwriting-Analyze'}
+      res=await fetch(`${url}/chat/completions`,{
+        method:'POST',headers:hdrs,
+        body:JSON.stringify({
+          model,messages:[
+            {role:'system',content:SYS_PROMPT},
+            {role:'user',content:[
+              {type:'image_url',image_url:{url:img64}},
+              {type:'text',text:'请对这张笔迹图片进行全面的笔迹心理分析，严格按照模板输出：'}
+            ]}
+          ],
+          max_tokens:4096,temperature:0.3
+        })
+      });
+    }
     if(!res.ok){const t=await res.text();let msg=t;try{const j=JSON.parse(t);msg=j.error?.message||j.message||t}catch(e){}throw new Error(`API ${res.status}: ${msg}`)}
     const d=await res.json();
-    render(d.choices[0].message.content);
+    const content = d.choices?.[0]?.message?.content || d.text || d.result || JSON.stringify(d);
+    render(content);
   }catch(e){notice('分析失败: '+e.message)}
   finally{$('ld').classList.remove('on')}
 }
