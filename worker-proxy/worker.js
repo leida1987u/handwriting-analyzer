@@ -1,29 +1,41 @@
 /**
- * 笔迹心鉴 · API 代理 Worker
+ * 笔迹心鉴 · API 代理 Worker（安全增强版）
  * 
- * 功能：接收前端请求，添加 API Key 后转发到通义千问/智谱等 API
- * 安全：API Key 存储在 Worker 环境变量中，不会暴露给前端
+ * 安全改进：
+ * 1. CORS 限制：只允许指定域名访问
+ * 2. 输入验证：模型白名单、图片大小限制
+ * 3. 错误处理：返回通用错误信息，不暴露内部细节
  */
 
 export default {
   async fetch(request, env, ctx) {
+    // CORS 配置 - 只允许指定域名
+    const allowedOrigins = [
+      'https://leida1987u.github.io',
+      'https://dark-dust-687a.leidada1987.workers.dev',
+    ];
+    
+    const origin = request.headers.get('Origin') || '';
+    const isAllowed = allowedOrigins.some(allowed => origin.startsWith(allowed));
+    
+    const corsHeaders = {
+      'Access-Control-Allow-Origin': isAllowed ? origin : 'https://leida1987u.github.io',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Max-Age': '86400',
+      'Vary': 'Origin',
+    };
+
     // 处理 CORS 预检请求
     if (request.method === 'OPTIONS') {
-      return new Response(null, {
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-          'Access-Control-Max-Age': '86400',
-        },
-      });
+      return new Response(null, { headers: corsHeaders });
     }
 
     // 只接受 POST 请求
     if (request.method !== 'POST') {
       return new Response(JSON.stringify({ error: 'Method not allowed' }), {
         status: 405,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -31,19 +43,37 @@ export default {
       const body = await request.json();
       const { model, image, prompt, system } = body;
 
-      if (!model || !image) {
-        return new Response(JSON.stringify({ error: 'Missing model or image' }), {
+      // 输入验证 - 模型白名单
+      const allowedModels = ['qwen3-omni-flash', 'qwen-vl-max', 'glm-4v-flash'];
+      if (!model || !allowedModels.includes(model)) {
+        return new Response(JSON.stringify({ error: 'Invalid model' }), {
           status: 400,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // 输入验证 - 图片
+      if (!image || typeof image !== 'string') {
+        return new Response(JSON.stringify({ error: 'Invalid image' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // 输入验证 - 图片大小（base64 编码后不超过 5MB）
+      if (image.length > 5 * 1024 * 1024) {
+        return new Response(JSON.stringify({ error: 'Image too large' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
       // 获取 API Key（从环境变量）
       const apiKey = env.DASHSCOPE_API_KEY;
       if (!apiKey) {
-        return new Response(JSON.stringify({ error: 'API key not configured on server' }), {
+        return new Response(JSON.stringify({ error: 'Service unavailable' }), {
           status: 500,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
@@ -51,10 +81,9 @@ export default {
       let apiUrl = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
       let headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
+        'Authorization': 'Bearer ' + apiKey,
       };
 
-      // 支持多模型
       if (model.startsWith('glm')) {
         apiUrl = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
       }
@@ -89,15 +118,16 @@ export default {
       return new Response(JSON.stringify(data), {
         status: apiResponse.status,
         headers: {
+          ...corsHeaders,
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
           'Cache-Control': 'no-store',
         },
       });
     } catch (error) {
-      return new Response(JSON.stringify({ error: error.message }), {
+      // 返回通用错误信息，不暴露内部细节
+      return new Response(JSON.stringify({ error: 'Internal server error' }), {
         status: 500,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
   },

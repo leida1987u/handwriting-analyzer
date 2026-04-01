@@ -289,6 +289,10 @@ drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransf
 fi.onchange=()=>{if(fi.files[0])handle(fi.files[0])};
 
 function handle(f){
+  // 文件类型验证
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  if(!allowedTypes.includes(f.type)){notice('仅支持 JPG/PNG/WEBP 格式的图片');return}
+  // 文件大小验证（10MB）
   if(f.size > 10*1024*1024){notice('图片过大，请上传10MB以下的图片');return}
   const r=new FileReader();
   r.onload=e=>{
